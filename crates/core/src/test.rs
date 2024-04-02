@@ -13175,3 +13175,26 @@ fn python_support_empty_line() {
     })
     .unwrap();
 }
+
+#[test]
+fn c_no_match() {
+    run_test_no_match({
+        TestArg {
+            pattern: r#"
+                |language c
+                |
+                |`TEST`
+                |"#
+            .trim_margin()
+            .unwrap(),
+            source: r#"
+                |echo "hello world"
+                |"#
+            .trim_margin()
+            .unwrap(),
+        }
+    })
+    .unwrap();
+}
+
+

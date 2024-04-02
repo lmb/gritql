@@ -40,6 +40,7 @@ process.on('uncaughtException', (err) => {
 // Constants
 ///////////////////////////////////////////////////
 const allLanguages = [
+  'c',
   'c-sharp',
   'css',
   'go',
