@@ -58,7 +58,7 @@
 	url = https://github.com/getgrit/tree-sitter-facade.git
 [submodule "tree-sitter-gritql"]
 	path = vendor/tree-sitter-gritql
-	url = https://github.com/getgrit/tree-sitter-gritql.git
+	url = /home/lorenz/dev/tree-sitter-gritql
 [submodule "resources/language-submodules/tree-sitter-toml"]
 	path = resources/language-submodules/tree-sitter-toml
 	url = https://github.com/ikatyang/tree-sitter-toml
