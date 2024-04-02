@@ -22,6 +22,7 @@ pub fn language_id_to_pattern_language(language_id: &str) -> Option<PatternLangu
         "vue" => Some(PatternLanguage::Vue),
         "toml" => Some(PatternLanguage::Toml),
         "php" => Some(PatternLanguage::Php),
+        "c" => Some(PatternLanguage::C),
         _ => None,
     }
 }
@@ -50,6 +51,7 @@ pub fn target_language_to_language_id(target_language: TargetLanguage) -> &'stat
         TargetLanguage::Vue(_) => "vue",
         TargetLanguage::Toml(_) => "toml",
         TargetLanguage::Php(_) => "php",
+        TargetLanguage::C(_) => "c",
     }
 }
 
@@ -58,4 +60,3 @@ pub fn extension_to_language_id(extension: &str) -> Option<String> {
     let language = TargetLanguage::from_extension(extension)?;
     Some(target_language_to_language_id(language).to_string())
 }
-

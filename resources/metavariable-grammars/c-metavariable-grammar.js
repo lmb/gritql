@@ -32,6 +32,7 @@ const PREC = {
   CALL: 15,
   FIELD: 16,
   SUBSCRIPT: 17,
+  GRIT_METAVARIABLE: 100,
 };
 
 module.exports = grammar({
@@ -68,9 +69,11 @@ module.exports = grammar({
     [$._type_specifier, $._old_style_parameter_list],
     [$.parameter_list, $._old_style_parameter_list],
     [$.function_declarator, $._function_declaration_declarator],
+    // Due to grit_metavariable.
+    [$._expression, $.identifier],
   ],
 
-  word: $ => $.identifier,
+  word: $ => $._orig_identifier,
 
   rules: {
     translation_unit: $ => repeat($._top_level_item),
@@ -540,7 +543,7 @@ module.exports = grammar({
 
     compound_statement: $ => seq(
       '{',
-      repeat($._block_item),
+      field('statements', repeat($._block_item)),
       '}',
     ),
 
@@ -813,10 +816,10 @@ module.exports = grammar({
     ),
 
     expression_statement: $ => seq(
-      optional(choice(
+      field('statement', optional(choice(
         $._expression,
         $.comma_expression,
-      )),
+      ))),
       ';',
     ),
 
@@ -925,6 +928,7 @@ module.exports = grammar({
     _expression: $ => choice(
       $._expression_not_binary,
       $.binary_expression,
+      $.grit_metavariable,
     ),
 
     _expression_not_binary: $ => choice(
@@ -1223,7 +1227,7 @@ module.exports = grammar({
       ),
     ),
 
-    subscript_designator: $ => seq('[', $._expression, ']'),
+    subscript_designator: $ => seq('[', field('index', $._expression), ']'),
 
     subscript_range_designator: $ => seq('[', field('start', $._expression), '...', field('end', $._expression), ']'),
 
@@ -1310,9 +1314,14 @@ module.exports = grammar({
     false: _ => token(choice('FALSE', 'false')),
     null: _ => choice('NULL', 'nullptr'),
 
-    identifier: _ =>
+    _orig_identifier: _ =>
       // eslint-disable-next-line max-len
       /(\p{XID_Start}|\$|_|\\u[0-9A-Fa-f]{4}|\\U[0-9A-Fa-f]{8})(\p{XID_Continue}|\$|\\u[0-9A-Fa-f]{4}|\\U[0-9A-Fa-f]{8})*/,
+
+    identifier: $ => choice(
+      $._orig_identifier,
+      $.grit_metavariable,
+    ),
 
     _type_identifier: $ => alias(
       $.identifier,
@@ -1342,6 +1351,8 @@ module.exports = grammar({
         '/',
       ),
     )),
+
+    grit_metavariable: ($) => token(prec(PREC.GRIT_METAVARIABLE, choice('µ...', /µ[a-zA-Z_][a-zA-Z0-9_]*/))),
   },
 
   supertypes: $ => [

@@ -365,6 +365,7 @@ fn pattern_language_to_path(lang: &PatternLanguage) -> Result<String, JsError> {
         PatternLanguage::Vue => Ok("/tree-sitter-vue.wasm"),
         PatternLanguage::Toml => Ok("/tree-sitter-toml.wasm"),
         PatternLanguage::Php => Ok("/tree-sitter-php_only.wasm"),
+        PatternLanguage::C => Ok("/tree-sitter-c.wasm"),
         PatternLanguage::Universal => Err(JsError::new("Universal does not have a parser")),
     }?;
     let final_file = format!("{}{}", get_parser_path(), wasm_file);

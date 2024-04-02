@@ -13197,4 +13197,109 @@ fn c_no_match() {
     .unwrap();
 }
 
+#[test]
+fn c_rewrite_var_decl_name() {
+    run_test_expected(TestArgExpected {
+        pattern: r#"
+                |language c
+                |
+                |`int $v = 0;` => `unsigned int $v = 1;`
+                |"#
+        .trim_margin()
+        .unwrap(),
+        source: "int foo = 0;".trim_margin().unwrap(),
+        expected: "unsigned int foo = 1;".trim_margin().unwrap(),
+    })
+    .unwrap();
+}
 
+#[test]
+fn c_rewrite_var_decl_type() {
+    run_test_expected(TestArgExpected {
+        pattern: r#"
+                |language c
+                |
+                |`$_ foo = 0;` => `char foo = 0;`
+                |"#
+        .trim_margin()
+        .unwrap(),
+        source: "int foo = 0;".trim_margin().unwrap(),
+        expected: "char foo = 0;".trim_margin().unwrap(),
+    })
+    .unwrap();
+}
+
+#[test]
+fn c_rewrite_var_decl_rhs() {
+    run_test_expected(TestArgExpected {
+        pattern: r#"
+                |language c
+                |
+                |`int foo = $_;` => `int foo;`
+                |"#
+        .trim_margin()
+        .unwrap(),
+        source: "int foo = 0;".trim_margin().unwrap(),
+        expected: "int foo;".trim_margin().unwrap(),
+    })
+    .unwrap();
+}
+
+#[test]
+fn c_rewrite_func_decl_identifier() {
+    run_test_expected(TestArgExpected {
+        pattern: r#"
+                |language c
+                |
+                |`void $fn(void);` => `int $fn();`
+                |"#
+        .trim_margin()
+        .unwrap(),
+        source: "void snazzy(void);".trim_margin().unwrap(),
+        expected: "int snazzy();".trim_margin().unwrap(),
+    })
+    .unwrap();
+}
+
+#[test]
+fn c_rewrite_func_decl_body() {
+    run_test_expected(TestArgExpected {
+        pattern: r#"
+                |language c
+                |
+                |`void foo() { $_; }` => `int foo() { return 1; }`
+                |"#
+        .trim_margin()
+        .unwrap(),
+        source: "void foo() { return 0; }".trim_margin().unwrap(),
+        expected: "int foo() { return 1; }".trim_margin().unwrap(),
+    })
+    .unwrap();
+}
+
+// #[test]
+// fn c_rewrite_pp_idef() {
+//     run_test_expected(TestArgExpected {
+//         pattern: r#"
+//                 |language c
+//                 |
+//                 |`fn(^a) => ^_` => `fn(^a) => $x * $x`
+//                 |"#
+//         .trim_margin()
+//         .unwrap(),
+//         source: r#"
+//                 |void foo() {
+//                 |#ifdef ENABLE_HOST_FIREWALL
+//                 |    int baz;
+//                 |    struct foo bar;
+//                 |    enum zaphod __maybe_unused sym;
+//                 |    void *data, *data_end;
+//                 |#endif /* ENABLE_HOST_FIREWALL */
+//                 |}
+//             "#
+//         .trim_margin()
+//         .unwrap(),
+//         expected: "$fn1 = fn($x) => $x * $x;".trim_margin().unwrap(),
+//     })
+//     .unwrap();
+// }

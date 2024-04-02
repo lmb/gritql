@@ -1,5 +1,6 @@
 use crate::language::{GritMetaValue, LeafEquivalenceClass, SnippetTree, TSLanguage};
 use crate::{
+    c::C,
     csharp::CSharp,
     css::Css,
     go::Go,
@@ -75,6 +76,7 @@ pub enum PatternLanguage {
     Vue,
     Toml,
     Php,
+    C,
     #[value(skip)]
     Universal,
 }
@@ -104,6 +106,7 @@ impl fmt::Display for PatternLanguage {
             PatternLanguage::Toml => write!(f, "toml"),
             PatternLanguage::Universal => write!(f, "universal"),
             PatternLanguage::Php => write!(f, "php"),
+            PatternLanguage::C => write!(f, "c"),
         }
     }
 }
@@ -132,6 +135,7 @@ impl From<&TargetLanguage> for PatternLanguage {
             TargetLanguage::Vue(_) => PatternLanguage::Vue,
             TargetLanguage::Toml(_) => PatternLanguage::Toml,
             TargetLanguage::Php(_) => PatternLanguage::Php,
+            TargetLanguage::C(_) => PatternLanguage::C,
         }
     }
 }
@@ -160,6 +164,7 @@ impl PatternLanguage {
             PatternLanguage::Vue => Vue::is_initialized(),
             PatternLanguage::Toml => Toml::is_initialized(),
             PatternLanguage::Php => Php::is_initialized(),
+            PatternLanguage::C => C::is_initialized(),
             PatternLanguage::Universal => false,
         }
     }
@@ -226,6 +231,7 @@ impl PatternLanguage {
             "vue" => Some(Self::Vue),
             "toml" => Some(Self::Toml),
             "php" => Some(Self::Php),
+            "c" => Some(Self::C),
             "universal" => Some(Self::Universal),
             _ => None,
         }
@@ -256,6 +262,7 @@ impl PatternLanguage {
             PatternLanguage::Vue => &["vue"],
             PatternLanguage::Toml => &["toml"],
             PatternLanguage::Php => &["php", "phps", "phar", "phtml", "pht"],
+            PatternLanguage::C => &["c", "h"],
             PatternLanguage::Universal => &[],
         }
     }
@@ -283,6 +290,7 @@ impl PatternLanguage {
             PatternLanguage::Vue => Some("vue"),
             PatternLanguage::Toml => Some("toml"),
             PatternLanguage::Php => Some("php"),
+            PatternLanguage::C => Some("c"),
             PatternLanguage::Universal => None,
         }
     }
@@ -477,6 +485,10 @@ pub fn expand_paths(
                         file_types.select("pht");
                         file_types.select("phps");
                     }
+                    PatternLanguage::C => {
+                        file_types.select("c");
+                        file_types.select("h");
+                    }
                     PatternLanguage::Universal => {}
                 }
             }
@@ -525,6 +537,7 @@ pub enum TargetLanguage {
     Toml(Toml),
     Sql(Sql),
     Php(Php),
+    C(C),
 }
 
 // when built to wasm the language must be initialized with a parser at least once
@@ -558,6 +571,7 @@ impl TryFrom<PatternLanguage> for TargetLanguage {
             PatternLanguage::Vue => Ok(TargetLanguage::Vue(Vue::new(None))),
             PatternLanguage::Toml => Ok(TargetLanguage::Toml(Toml::new(None))),
             PatternLanguage::Php => Ok(TargetLanguage::Php(Php::new(None))),
+            PatternLanguage::C => Ok(TargetLanguage::C(C::new(None))),
             PatternLanguage::Universal => {
                 Err("cannot instantiate Universal as a target language".to_string())
             }
@@ -589,6 +603,7 @@ impl fmt::Display for TargetLanguage {
             TargetLanguage::Vue(_) => write!(f, "vue"),
             TargetLanguage::Toml(_) => write!(f, "toml"),
             TargetLanguage::Php(_) => write!(f, "php"),
+            TargetLanguage::C(_) => write!(f, "c"),
         }
     }
 }
@@ -633,6 +648,7 @@ impl TargetLanguage {
             TargetLanguage::Vue(_) => PatternLanguage::Vue,
             TargetLanguage::Toml(_) => PatternLanguage::Toml,
             TargetLanguage::Php(_) => PatternLanguage::Php,
+            TargetLanguage::C(_) => PatternLanguage::C,
         }
     }
 
@@ -659,6 +675,7 @@ impl TargetLanguage {
             TargetLanguage::Vue(_) => false,
             TargetLanguage::Toml(_) => false,
             TargetLanguage::Php(_) => false,
+            TargetLanguage::C(_) => false,
         }
     }
 
@@ -695,7 +712,7 @@ impl TargetLanguage {
             | TargetLanguage::Vue(_)
             | TargetLanguage::MarkdownBlock(_)
             | TargetLanguage::MarkdownInline(_) => format!("<!-- {} -->\n", text),
-            TargetLanguage::Css(_) => format!("/* {} */\n", text),
+            TargetLanguage::Css(_) | TargetLanguage::C(_) => format!("/* {} */\n", text),
             TargetLanguage::Sql(_) => format!("-- {}\n", text),
         }
     }
